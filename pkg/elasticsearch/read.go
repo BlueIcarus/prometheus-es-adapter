@@ -3,10 +3,11 @@ package elasticsearch
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
+	elastic "github.com/olivere/elastic/v7"
 	"github.com/prometheus/prometheus/prompb"
 	"go.uber.org/zap"
-	elastic "gopkg.in/olivere/elastic.v6"
 )
 
 // ReadService will proxy Prometheus queries to Elasticsearch
@@ -41,7 +42,7 @@ func (svc *ReadService) Read(ctx context.Context, req []*prompb.Query) ([]*promp
 		if err != nil {
 			return nil, err
 		}
-		svc.logger.Debug("Query returned results", zap.Int64("hits", resp.Hits.TotalHits))
+		svc.logger.Debug(fmt.Sprintf("Query returned results %+v", resp.Hits.TotalHits))
 		ts, err := svc.createTimeseries(resp.Hits)
 		if err != nil {
 			return nil, err
@@ -82,7 +83,7 @@ func (svc *ReadService) createTimeseries(results *elastic.SearchHits) ([]*prompb
 	tsMap := make(map[string]*prompb.TimeSeries)
 	for _, r := range results.Hits {
 		var s prometheusSample
-		if err := json.Unmarshal([]byte(*r.Source), &s); err != nil {
+		if err := json.Unmarshal(r.Source, &r); err != nil {
 			svc.logger.Fatal("Failed to unmarshal sample", zap.Error(err))
 		}
 		fingerprint := s.Labels.Fingerprint().String()

@@ -7,8 +7,8 @@ import (
 	"html/template"
 	"time"
 
+	elastic "github.com/olivere/elastic/v7"
 	"go.uber.org/zap"
-	elastic "gopkg.in/olivere/elastic.v6"
 )
 
 // IndexService will manage alias and indexes derived from the configured index alias
@@ -59,7 +59,7 @@ func EnsureIndexTemplate(ctx context.Context, client *elastic.Client, config *In
 	}
 	payload := buf.String()
 
-	_, err = client.IndexPutTemplate(config.Alias).BodyString(payload).Do(ctx)
+	_, err = client.IndexPutIndexTemplate(config.Alias).BodyString(payload).Do(ctx)
 	if err != nil {
 		return fmt.Errorf("Failed to create index template: %s", err)
 	}

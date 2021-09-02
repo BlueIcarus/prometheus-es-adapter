@@ -2,4 +2,3 @@
 bin
 coverage.out
 release/
-vendor/

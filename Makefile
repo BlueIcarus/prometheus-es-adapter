@@ -65,3 +65,7 @@ down:
 .PHONY: logs
 logs:
 	docker-compose -f docker-compose.yml logs -f
+
+.PHONY: docker
+docker:
+	docker build -t prometheus-es-adapter .

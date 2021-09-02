@@ -1,34 +1,96 @@
-version: '3.3'
+version: "3.9"
 services:
+  create_certs:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: create_certs
+    command: >
+      bash -c '
+        yum install -y -q -e 0 unzip;
+        if [[ ! -f /certs/bundle.zip ]]; then
+          bin/elasticsearch-certutil cert --silent --pem --in config/certificates/instances.yml -out /certs/bundle.zip;
+          unzip /certs/bundle.zip -d /certs;
+        fi;
+        chown -R 1000:0 /certs
+      '
+    working_dir: /usr/share/elasticsearch
+    volumes:
+      - certs:/certs
+      - ./test/:/usr/share/elasticsearch/config/certificates
+
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    container_name: elasticsearch
+    depends_on:
+      create_certs:
+        condition: service_completed_successfully
     ports:
       - '9200:9200'
       - '9300:9300'
     environment:
-      ES_NODE_NAME: elasticsearch
-      discovery.type: single-node
-
-  ui-cerebro:
-    image: ludekvesely/elasticsearch-cerebro
-    links:
-      - elasticsearch
-    ports:
-      - '9000:9000'
-    environment:
-      ELASTICSEARCH_HOST: http://elasticsearch:9200
+      node.name: "elasticsearch"
+      discovery.type: "single-node"
+      bootstrap.memory_lock: "true"
+      cluster.name: "es-docker-cluster"
+      ES_JAVA_OPTS: "-Xms750m -Xmx750m"
+      ELASTIC_PASSWORD: "elastic"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "true"
+      xpack.security.http.ssl.key: "/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key"
+      xpack.security.http.ssl.certificate_authorities: "/usr/share/elasticsearch/config/certs/ca/ca.crt"
+      xpack.security.http.ssl.certificate: "/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt"
+      xpack.security.transport.ssl.enabled: "true"
+      xpack.security.transport.ssl.verification_mode: "certificate"
+      xpack.security.transport.ssl.certificate_authorities: "/usr/share/elasticsearch/config/certs/ca/ca.crt"
+      xpack.security.transport.ssl.certificate: "/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt"
+      xpack.security.transport.ssl.key: "/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    healthcheck:
+      test: curl --cacert /usr/share/elasticsearch/config/certs/ca/ca.crt -s https://localhost:9200 >/dev/null; if [[ $$? == 52 ]]; then echo 0; else echo 1; fi
+      timeout: 10s
+      interval: 30s
+      retries: 5
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
+#
+#  ui-cerebro:
+#    image: lmenezes/cerebro:0.9.4
+#    links:
+#      - elasticsearch
+#    ports:
+#      - '9000:9000'
+#    environment:
+#      ELASTICSEARCH_HOST: http://elasticsearch:9200
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.4.2
+    image: docker.elastic.co/kibana/kibana:7.14.0
+    container_name: kibana
     links:
       - elasticsearch
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     ports:
       - '5601:5601'
     environment:
-      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      ELASTICSEARCH_URL: "https://elasticsearch:9200"
+      ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
+      ELASTICSEARCH_USERNAME: "elastic"
+      ELASTICSEARCH_PASSWORD: "elastic"
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: "/usr/share/elasticsearch/config/certs/ca/ca.crt"
+      SERVER_SSL_ENABLED: "true"
+      SERVER_SSL_KEY: "/usr/share/elasticsearch/config/certs/kibana/kibana.key"
+      SERVER_SSL_CERTIFICATE: "/usr/share/elasticsearch/config/certs/kibana/kibana.crt"
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
 
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.29.2
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     ports:
       - '9090:9090'
     # command:
@@ -44,19 +106,33 @@ services:
   prometheus-es-adapter:
     build:
       context: .
+    links:
+      - elasticsearch
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     ports:
       - '8000:8000'
       - '8001:9000'
     environment:
-      - ES_URL=http://elasticsearch:9200
-      - ES_INDEX_DAILY=true
-      - ES_INDEX_SHARDS=1
-      - ES_INDEX_REPLICAS=0
-      - ES_INDEX_MAX_DOCS=2000
-      - DEBUG=true
+      ES_URL: "https://elasticsearch:9200"
+      ES_INDEX_DAILY: "true"
+      ES_INDEX_SHARDS: "1"
+      ES_INDEX_REPLICAS: "0"
+      ES_INDEX_MAX_DOCS: "2000"
+      ED_RETRY_COUNT: "300"
+      ES_TLS_CA: "/usr/share/elasticsearch/config/certs/ca/ca.crt"
+      ES_TLS_KEY: "/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.key"
+      ES_TLS_CERT: "/usr/share/elasticsearch/config/certs/elasticsearch/elasticsearch.crt"
+      ES_USER: "elastic"
+      ES_PASSWORD: "elastic"
+    volumes:
+      - certs:/usr/share/elasticsearch/config/certs
 
   node-exporter:
-    image: prom/node-exporter
+    image: prom/node-exporter:v1.2.2
+    links:
+      - prometheus
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -68,3 +144,7 @@ services:
       - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
     ports:
       - 9100:9100
+
+volumes:
+  certs:
+    driver: local

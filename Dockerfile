@@ -1,5 +1,5 @@
 # Build Stage
-FROM golang:1.12 AS build-stage
+FROM golang:1.17 AS build-stage
 
 WORKDIR /src
 ADD . .
@@ -7,24 +7,18 @@ ADD . .
 RUN make test && make build
 
 # Final Stage
-FROM alpine:latest
+FROM gcr.io/distroless/base-debian10
 
 ENV USERID 789
-ENV USERNAME pesa
-
-RUN addgroup -g ${USERID} -S ${USERNAME} \
-  && adduser -u ${USERID} -G ${USERNAME} -S ${USERNAME}
 
 ARG GIT_COMMIT
 ARG VERSION
-LABEL REPO="https://github.com/pwillie/prometheus-es-adapter"
+LABEL REPO="https://github.com/BlueIcarus/prometheus-es-adapter"
 LABEL GIT_COMMIT=$GIT_COMMIT
 LABEL VERSION=$VERSION
 
-RUN apk add -U ca-certificates
-
 COPY --from=build-stage /src/release/linux/amd64/prometheus-es-adapter /usr/local/bin/
 
-USER ${USERNAME}
+USER ${USERID}
 
-ENTRYPOINT [ "prometheus-es-adapter" ]
+CMD [ "prometheus-es-adapter" ]
