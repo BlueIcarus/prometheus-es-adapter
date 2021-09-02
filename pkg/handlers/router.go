@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/BlueIcarus/prometheus-es-adapter/pkg/elasticsearch"
 	"github.com/olivere/elastic/v7"
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/pwillie/prometheus-es-adapter/pkg/elasticsearch"
 )
 
 // NewRouter returns a configured http router

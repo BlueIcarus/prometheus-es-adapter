@@ -12,14 +12,14 @@ import (
 	"os"
 	"time"
 
+	"github.com/BlueIcarus/prometheus-es-adapter/pkg/elasticsearch"
+	"github.com/BlueIcarus/prometheus-es-adapter/pkg/handlers"
+	"github.com/BlueIcarus/prometheus-es-adapter/pkg/logger"
 	"github.com/TV4/graceful"
 	"github.com/avast/retry-go/v3"
 	gorilla "github.com/gorilla/handlers"
 	"github.com/namsral/flag"
 	elastic "github.com/olivere/elastic/v7"
-	"github.com/pwillie/prometheus-es-adapter/pkg/elasticsearch"
-	"github.com/pwillie/prometheus-es-adapter/pkg/handlers"
-	"github.com/pwillie/prometheus-es-adapter/pkg/logger"
 	"go.uber.org/zap"
 )
 

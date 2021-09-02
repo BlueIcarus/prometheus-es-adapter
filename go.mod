@@ -1,4 +1,4 @@
-module github.com/pwillie/prometheus-es-adapter
+module github.com/BlueIcarus/prometheus-es-adapter
 
 go 1.17
 
