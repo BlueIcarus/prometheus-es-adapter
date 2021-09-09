@@ -66,6 +66,7 @@ Although *prometheus-es-adapter* will create and rollover ElasticSearch indexes 
 ## Changelog
 ### v1.0.1-7
 1. Added some additional messages related to certificate loading
+2. Fixed an issue with the ca root certificate loading
 
 ### v1.0.0-7
 1. `Dockerfile`: Migrated Docker image from `Alpine` to `distroless`;

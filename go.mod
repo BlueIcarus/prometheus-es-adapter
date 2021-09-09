@@ -35,15 +35,3 @@ require (
 	google.golang.org/protobuf v1.25.0 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
 )
-
-require (
-	github.com/StackExchange/wmi v1.2.1 // indirect
-	github.com/go-ole/go-ole v1.2.5 // indirect
-	github.com/google/gops v0.3.20 // indirect
-	github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19 // indirect
-	github.com/shirou/gopsutil/v3 v3.21.8 // indirect
-	github.com/tklauser/go-sysconf v0.3.9 // indirect
-	github.com/tklauser/numcpus v0.3.0 // indirect
-	github.com/xlab/treeprint v1.1.0 // indirect
-	rsc.io/goversion v1.2.0 // indirect
-)
