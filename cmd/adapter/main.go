@@ -104,6 +104,8 @@ func main() {
 		cert, err = tls.LoadX509KeyPair(*tlsCertFile, *tlsKeyFile)
 		if err != nil {
 			log.Error("Could not process es_tls_cert/es_tls_key files", zap.Error(err))
+		} else {
+			log.Info("Loaded es_tls_cert/es_tls_key files")
 		}
 	}
 
@@ -113,7 +115,12 @@ func main() {
 			log.Error("Could not process es_tls_ca file", zap.Error(err))
 		} else {
 			caCertPool := x509.NewCertPool()
-			caCertPool.AppendCertsFromPEM(caCert)
+			err := caCertPool.AppendCertsFromPEM(caCert)
+			if !err {
+				log.Error("Failed to populate CA pool")
+			} else {
+				log.Info("Loaded es_tls_ca file")
+			}
 		}
 	}
 
