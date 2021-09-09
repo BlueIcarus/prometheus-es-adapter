@@ -1,3 +1,5 @@
+# github.com/StackExchange/wmi v1.2.1
+## explicit; go 1.13
 # github.com/TV4/graceful v0.3.4
 ## explicit
 github.com/TV4/graceful
@@ -7,6 +9,8 @@ github.com/avast/retry-go/v3
 # github.com/beorn7/perks v1.0.0
 ## explicit; go 1.12
 github.com/beorn7/perks/quantile
+# github.com/go-ole/go-ole v1.2.5
+## explicit; go 1.12
 # github.com/gogo/protobuf v1.1.1
 ## explicit
 github.com/gogo/protobuf/proto
@@ -28,6 +32,8 @@ github.com/golang/protobuf/ptypes/wrappers
 # github.com/golang/snappy v0.0.1
 ## explicit
 github.com/golang/snappy
+# github.com/google/gops v0.3.20
+## explicit; go 1.12
 # github.com/gorilla/handlers v1.4.0
 ## explicit
 github.com/gorilla/handlers
@@ -42,6 +48,8 @@ github.com/heptiolabs/healthcheck
 # github.com/josharian/intern v1.0.0
 ## explicit; go 1.5
 github.com/josharian/intern
+# github.com/keybase/go-ps v0.0.0-20190827175125-91aafc93ba19
+## explicit
 # github.com/mailru/easyjson v0.7.7
 ## explicit; go 1.12
 github.com/mailru/easyjson
@@ -81,6 +89,14 @@ github.com/prometheus/procfs/internal/fs
 # github.com/prometheus/prometheus v2.5.0+incompatible
 ## explicit
 github.com/prometheus/prometheus/prompb
+# github.com/shirou/gopsutil/v3 v3.21.8
+## explicit; go 1.15
+# github.com/tklauser/go-sysconf v0.3.9
+## explicit; go 1.13
+# github.com/tklauser/numcpus v0.3.0
+## explicit; go 1.11
+# github.com/xlab/treeprint v1.1.0
+## explicit; go 1.13
 # go.uber.org/atomic v1.4.0
 ## explicit
 go.uber.org/atomic
@@ -104,7 +120,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20210510120138-977fb7262007
+# golang.org/x/sys v0.0.0-20210902050250-f475640dd07b
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
@@ -202,4 +218,6 @@ google.golang.org/protobuf/types/known/timestamppb
 google.golang.org/protobuf/types/known/wrapperspb
 google.golang.org/protobuf/types/pluginpb
 # gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
+## explicit
+# rsc.io/goversion v1.2.0
 ## explicit

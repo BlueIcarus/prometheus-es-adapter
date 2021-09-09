@@ -31,10 +31,10 @@ var (
 	// Global Elastic client
 	client     *elastic.Client
 	cert       tls.Certificate
-	caCert     *os.File
-	caCertPool *x509.CertPool
-	err        error
-	rtc        = 1
+	caCertPool *x509.CertPool = x509.NewCertPool()
+
+	err error
+	rtc = 1
 )
 
 func main() {
@@ -114,9 +114,9 @@ func main() {
 		if err != nil {
 			log.Error("Could not process es_tls_ca file", zap.Error(err))
 		} else {
-			caCertPool := x509.NewCertPool()
-			err := caCertPool.AppendCertsFromPEM(caCert)
-			if !err {
+			//caCertPool := x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(caCert)
+			if caCertPool == nil {
 				log.Error("Failed to populate CA pool")
 			} else {
 				log.Info("Loaded es_tls_ca file")
