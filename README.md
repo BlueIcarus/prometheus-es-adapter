@@ -64,6 +64,9 @@ ES_URL=http://elasticsearch:9200 ./prometheus-es-adapter
 Although *prometheus-es-adapter* will create and rollover ElasticSearch indexes it is expected that a tool such as ElasticSearch Curator will be used to maintain quiescent indexes eg deleting, shrinking and merging old indexes.
 
 ## Changelog
+### v1.0.1-7
+1. Added some additional messages related to certificate loading
+
 ### v1.0.0-7
 1. `Dockerfile`: Migrated Docker image from `Alpine` to `distroless`;
 2. `Docker-compose.yml`:
