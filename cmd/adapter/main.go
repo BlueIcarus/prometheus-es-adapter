@@ -39,31 +39,32 @@ var (
 
 func main() {
 	var (
-		urls           = flag.String("es_url", "http://localhost:9200", "ElasticSearch URL")
-		user           = flag.String("es_user", "", "ElasticSearch user")
-		pass           = flag.String("es_password", "", "ElasticSearch user password.")
-		workers        = flag.Int("es_workers", 1, "Number of batch workers.")
-		batchMaxAge    = flag.Int("es_batch_max_age", 10, "Max period in seconds between bulk ElasticSearch insert operations")
-		batchMaxDocs   = flag.Int("es_batch_max_docs", 1000, "Max items for bulk ElasticSearch insert operation")
-		batchMaxSize   = flag.Int("es_batch_max_size", 4096, "Max size in bytes for bulk ElasticSearch insert operation")
-		indexAlias     = flag.String("es_alias", "prom-metrics", "ElasticSearch alias pointing to active write index")
-		indexDaily     = flag.Bool("es_index_daily", false, "Create daily indexes and disable index management service")
-		indexShards    = flag.Int("es_index_shards", 5, "Number of ElasticSearch shards to create per index")
-		indexReplicas  = flag.Int("es_index_replicas", 1, "Number of ElasticSearch replicas to create per index")
-		indexMaxAge    = flag.String("es_index_max_age", "7d", "Max age of ElasticSearch index before rollover")
-		indexMaxDocs   = flag.Int64("es_index_max_docs", 1000000, "Max number of docs in ElasticSearch index before rollover")
-		indexMaxSize   = flag.String("es_index_max_size", "", "Max size of index before rollover eg 5gb")
-		searchMaxDocs  = flag.Int("es_search_max_docs", 1000, "Max number of docs returned for ElasticSearch search operation")
-		sniffEnabled   = flag.Bool("es_sniff", false, "Enable ElasticSearch sniffing")
-		tlsCertFile    = flag.String("es_tls_cert", "", "Location of the TLS cert file (es_tls_key required)")
-		tlsKeyFile     = flag.String("es_tls_key", "", "Location of the TLS key file (es_tls_cert required)")
-		tlsCaFile      = flag.String("es_tls_ca", "", "Location of the TLS ca file")
-		retryCount     = flag.Uint("es_retry_count", 10, "Amount of retries to connect to ElasticSearch before exiting")
-		retryDelay     = flag.Duration("es_retry_delay", 10, "Amount of seconds to wait between retries to connect to ElasticSearch before exiting")
-		prometheusPort = flag.Int("prometheus_port", 8000, "Port that Prometheus connects to for read/write")
-		adminPort      = flag.Int("admin_port", 9000, "Port that Prometheus connects to for read/write")
-		statsEnabled   = flag.Bool("stats", true, "Expose Prometheus metrics endpoint")
-		debug          = flag.Bool("debug", false, "Debug logging")
+		urls              = flag.String("es_url", "http://localhost:9200", "ElasticSearch URL")
+		user              = flag.String("es_user", "", "ElasticSearch user")
+		pass              = flag.String("es_password", "", "ElasticSearch user password.")
+		workers           = flag.Int("es_workers", 1, "Number of batch workers.")
+		batchMaxAge       = flag.Int("es_batch_max_age", 10, "Max period in seconds between bulk ElasticSearch insert operations")
+		batchMaxDocs      = flag.Int("es_batch_max_docs", 1000, "Max items for bulk ElasticSearch insert operation")
+		batchMaxSize      = flag.Int("es_batch_max_size", 4096, "Max size in bytes for bulk ElasticSearch insert operation")
+		indexAlias        = flag.String("es_alias", "prom-metrics", "ElasticSearch alias pointing to active write index")
+		indexDaily        = flag.Bool("es_index_daily", false, "Create daily indexes and disable index management service")
+		indexShards       = flag.Int("es_index_shards", 5, "Number of ElasticSearch shards to create per index")
+		indexReplicas     = flag.Int("es_index_replicas", 1, "Number of ElasticSearch replicas to create per index")
+		indexMaxAge       = flag.String("es_index_max_age", "7d", "Max age of ElasticSearch index before rollover")
+		indexMaxDocs      = flag.Int64("es_index_max_docs", 1000000, "Max number of docs in ElasticSearch index before rollover")
+		indexMaxSize      = flag.String("es_index_max_size", "", "Max size of index before rollover eg 5gb")
+		loadIndexTemplate = flag.Bool("es_index_template", true, "Load the ElasticSearch index Template")
+		searchMaxDocs     = flag.Int("es_search_max_docs", 1000, "Max number of docs returned for ElasticSearch search operation")
+		sniffEnabled      = flag.Bool("es_sniff", false, "Enable ElasticSearch sniffing")
+		tlsCertFile       = flag.String("es_tls_cert", "", "Location of the TLS cert file (es_tls_key required)")
+		tlsKeyFile        = flag.String("es_tls_key", "", "Location of the TLS key file (es_tls_cert required)")
+		tlsCaFile         = flag.String("es_tls_ca", "", "Location of the TLS ca file")
+		retryCount        = flag.Uint("es_retry_count", 10, "Amount of retries to connect to ElasticSearch before exiting")
+		retryDelay        = flag.Duration("es_retry_delay", 10, "Amount of seconds to wait between retries to connect to ElasticSearch before exiting")
+		prometheusPort    = flag.Int("prometheus_port", 8000, "Port that Prometheus connects to for read/write")
+		adminPort         = flag.Int("admin_port", 9000, "Port that Prometheus connects to for read/write")
+		statsEnabled      = flag.Bool("stats", true, "Expose Prometheus metrics endpoint")
+		debug             = flag.Bool("debug", false, "Debug logging")
 	)
 	flag.Parse()
 
@@ -299,13 +300,15 @@ func main() {
 		log.Fatal("Elastic client connection has invalid state", zap.Error(err))
 	}
 
-	err = elasticsearch.EnsureIndexTemplate(ctx, client, &elasticsearch.IndexTemplateConfig{
-		Alias:    *indexAlias,
-		Shards:   *indexShards,
-		Replicas: *indexReplicas,
-	})
-	if err != nil {
-		log.Fatal("Failed to create index template", zap.Error(err))
+	if *loadIndexTemplate {
+		err = elasticsearch.EnsureIndexTemplate(ctx, client, &elasticsearch.IndexTemplateConfig{
+			Alias:    *indexAlias,
+			Shards:   *indexShards,
+			Replicas: *indexReplicas,
+		})
+		if err != nil {
+			log.Fatal("Failed to create index template", zap.Error(err))
+		}
 	}
 
 	if !*indexDaily {
